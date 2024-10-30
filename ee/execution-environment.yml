@@ -1,0 +1,20 @@
+version: 3
+
+images:
+  base_image:
+    name: quay.io/fedora/fedora:latest
+
+dependencies:
+  ansible_core:
+    package_pip: ansible-core
+  ansible_runner:
+    package_pip: ansible-runner
+  python:
+    - python3-apt
+  python_interpreter:
+    package_system: "python310"
+    python_path: "/usr/bin/python3.10"
+
+  system:
+  - openssh-clients
+  - sshpass

@@ -1,0 +1,19 @@
+
+- block:
+    - name: Clone dotfiles
+      ansible.builtin.git:
+        repo: https://github.com/nlarson2/dotfiles.git
+        dest: ~/dotfiles
+
+    - name: Move .config directory
+      ansible.builtin.copy:
+        src: ~/dotfiles/
+        remote_src: true
+        dest: ~/.
+
+  always:
+    - name: Detele dotfiles directory
+      ansible.builtin.file:
+        path: ~/dotfiles
+        state: absent 
+

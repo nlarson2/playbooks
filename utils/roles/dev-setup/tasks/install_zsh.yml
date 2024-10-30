@@ -1,0 +1,63 @@
+
+
+- name: Check if zsh is already in use
+  register: file_exists
+  ansible.builtin.stat: 
+    path: ~/.zshrc
+
+
+- name: Intall and set ZSH as default shell
+  when: file_exists.stat.exists == false
+  block:
+
+    - name: Get oh-my-zsh install script
+      ansible.builtin.get_url:
+        url: 'https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh'
+        dest: ./omz_install.sh
+        mode: '700'
+        owner: nlarson
+
+    - name: Edit oh-imy-zsh install script
+      ansible.builtin.replace:
+        path: ./omz_install.sh
+        regexp: 'read -r opt'
+        replace: 'return'
+          
+    - name: Run ZSH install script
+      ansible.builtin.command:
+        argv: 
+          - ./omz_install.sh
+          - --unattended
+    
+    - name: Update ZSH config
+      ansible.builtin.replace:
+        path: ./.zshrc
+        regexp: 'ZSH_THEME="robbyrussell"'
+        replace: 'ZSH_THEME="simple"'
+
+
+    - name: Update user default shell
+      become: true
+      ansible.builtin.user:
+        name: nlarson
+        shell: /usr/bin/zsh
+  
+  rescue:
+    - name: Remove zshrc
+      ansible.builtin.file:
+        path: ./.zshrc
+        state: absent
+    
+    - name: Remove .oh-my-zsh
+      ansible.builtin.file:
+        path: ./.oh-my-zsh
+        state: absent
+    
+
+  always:
+    - name: remove install script
+      ansible.builtin.file:
+        path: ./omz_install.sh
+        state: absent
+    
+

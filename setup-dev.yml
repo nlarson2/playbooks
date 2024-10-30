@@ -1,0 +1,7 @@
+---
+- name: Setup dev env
+  remote_user: nlarson
+  hosts: all
+
+  roles: 
+    - ./utils/roles/dev-setup

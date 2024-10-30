@@ -1,0 +1,19 @@
+- name: install deps
+  become: true
+  ansible.builtin.apt:
+    name:
+      - zsh
+      - tmux
+      - software-properties-common
+      - python3-pip
+      - gcc
+
+- name: Install ZSH
+  ansible.builtin.include_tasks: install_zsh.yml
+
+- name: Install Neovim
+  ansible.builtin.include_tasks: install_neovim.yml
+
+- name: Setup dotfiles
+  ansible.builtin.include_tasks: update_configs.yml
+
