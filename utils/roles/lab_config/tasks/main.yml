@@ -1,48 +1,40 @@
 ---
-- name: Join domain
-  remote_user: nlarson
-  hosts: all
-  vars:
-    dns_ip: ""
-    host: 
-    apiKey: 
-  tasks:
 
-    - name: Create netplan file
-      become: true
-      ansible.builtin.copy:
-        content: |
-          network:
-            ethernets:
-              ens18:
-                nameservers:
-                  addresses: [{{ dns_ip }}]
-                dhcp4: true
-            version: 2
-        dest: /etc/netplan/nameserver.yaml
-        mode: '0600'
+- name: Create netplan file
+  become: true
+  ansible.builtin.copy:
+    content: |
+      network:
+        ethernets:
+          ens18:
+            nameservers:
+              addresses: [{{ dns_ip }}]
+            dhcp4: true
+        version: 2
+    dest: /etc/netplan/nameserver.yaml
+    mode: '0600'
 
 
-    - name: Run netplan
-      become: true
-      ansible.builtin.command: netplan apply
+- name: Run netplan
+  become: true
+  ansible.builtin.command: netplan apply
 
-    - name: Define url parameters
-      ansible.builtin.set_fact:
-        node_name: "{{ ansible_facts.nodename }}"
-        ip_addr: "{{ ansible_facts.all_ipv4_addresses.0 }}"
-    
-    - name: generate url
-      ansible.builtin.set_fact:
-        url: "http://{{ host }}/admin/api.php?customdns&auth={{ apiKey }}&action=add&ip={{ ip_addr }}&domain={{ node_name }}.pi.hole"
+- name: Define url parameters
+  ansible.builtin.set_fact:
+    node_name: "{{ ansible_facts.nodename }}"
+    ip_addr: "{{ ansible_facts.all_ipv4_addresses.0 }}"
 
-    - name: Submit reqeust
-      register: response
-      ansible.builtin.uri:
-        url: "{{ url }}"
-        method: GET
-        status_code: 200
+- name: generate url
+  ansible.builtin.set_fact:
+    url: "http://{{ host }}/admin/api.php?customdns&auth={{ apiKey }}&action=add&ip={{ ip_addr }}&domain={{ node_name }}.pi.hole"
 
-    - name: debug
-      ansible.builtin.debug:
-        msg: "{{ response }}"
+- name: Submit reqeust
+  register: response
+  ansible.builtin.uri:
+    url: "{{ url }}"
+    method: GET
+    status_code: 200
+
+- name: debug
+  ansible.builtin.debug:
+    msg: "{{ response }}"
