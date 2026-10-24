@@ -17,8 +17,6 @@
 #     name: neovim
 #     state: present
 
-
----
 - name: Remove Neovim PPA
   become: true
   ansible.builtin.apt_repository:
