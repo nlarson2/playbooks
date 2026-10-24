@@ -4,7 +4,7 @@
   ansible.builtin.apt_repository:
     repo: ppa:neovim-ppa/unstable
     state: present
-    update_cashe: false
+    update_cache: false
 
 - name: Udpate apt packages
   become: true
