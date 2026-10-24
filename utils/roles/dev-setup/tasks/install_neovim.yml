@@ -1,16 +1,66 @@
 ---
-- name: Add Neovim apt repo
-  become: true
-  ansible.builtin.apt_repository:
-    repo: ppa:neovim-ppa/unstable
-    state: present
-    update_cache: false
+# - name: Add Neovim apt repo
+#   become: true
+#   ansible.builtin.apt_repository:
+#     repo: ppa:neovim-ppa/unstable
+#     state: present
+#     update_cache: false
 
-- name: Udpate apt packages
+# - name: Udpate apt packages
+#   become: true
+#   ansible.builtin.apt:
+#     update_cache: true
+ 
+# - name: Install Neovim
+#   become: true
+#   ansible.builtin.apt:
+#     name: neovim
+#     state: present
+
+- name: Install repository prerequisites
   become: true
   ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
     update_cache: true
- 
+
+- name: Create APT keyrings directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Download Neovim PPA signing key
+  become: true
+  ansible.builtin.get_url:
+    url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x9DBB0BE9366964F134855E2255F96FCF8231B6DD"
+    dest: /tmp/neovim-ppa-key.asc
+    mode: "0644"
+
+- name: Convert Neovim signing key to keyring format
+  become: true
+  ansible.builtin.command:
+    cmd: >-
+      gpg --dearmor --yes
+      --output /etc/apt/keyrings/neovim-ppa.gpg
+      /tmp/neovim-ppa-key.asc
+    creates: /etc/apt/keyrings/neovim-ppa.gpg
+
+- name: Add Neovim stable repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/neovim-ppa.gpg]
+      https://ppa.launchpadcontent.net/neovim-ppa/stable/ubuntu
+      {{ ansible_distribution_release }} main
+    filename: neovim-ppa
+    state: present
+    update_cache: true
+
 - name: Install Neovim
   become: true
   ansible.builtin.apt:
